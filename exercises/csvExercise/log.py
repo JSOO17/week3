@@ -34,8 +34,3 @@ class Log(object):
 
 if __name__ == '__main__':
     log = Log()
-    log.info("Buenas")
-    log.error("como tas?")
-    log.debug("ahí suavesito")
-    log2 = Log()
-    print(log is log2)

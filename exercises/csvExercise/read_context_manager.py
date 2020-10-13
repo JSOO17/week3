@@ -6,21 +6,33 @@ from exercises.csvExercise.log import Log
 log = Log()
 
 
+def decorator_logs(function):
+    def wraper(*args, **kwargs):
+        log.info("Opening file")
+        result = function(*args, **kwargs)
+        return result
+    return wraper
+
+
 def ignore_first(read) -> list:
     df = list(read)
     if df:
         df.pop(0)
     return df
 
+@decorator_logs
+def open_file():
+    try:
+        with open(FILE, encoding="utf8") as f:
+            reader = ignore_first(csv.reader(f))
+            return reader
+    except UnicodeDecodeError:
+        log.error("could not fetching")
+
 
 class ReaderContextManager:
     def __enter__(self):
-        try:
-            with open(FILE, encoding="utf8") as f:
-                reader = ignore_first(csv.reader(f))
-                return reader
-        except UnicodeDecodeError:
-            log.error("could not fetching")
+        return open_file()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
@@ -45,6 +57,7 @@ def writer_csv(writer):
     log.info(str(f"{times_id} repeat"))
 
 
+@decorator_logs
 def initialize_writer(function, mode='w') -> None:
     try:
         with open(FILE, mode, newline="") as f:
@@ -54,4 +67,4 @@ def initialize_writer(function, mode='w') -> None:
 
             function(writer)
     except UnicodeDecodeError:
-        print("could not open")
+        log.error("could not open")
